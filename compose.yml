@@ -1,0 +1,12 @@
+services:
+  respawn_db:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_DB: respawn_db
+      POSTGRES_USER: respawn_user
+      POSTGRES_PASSWORD: 'mypassword123'
+    ports:
+      - 127.0.0.1:5469:5432
+    volumes:
+      - ./db_respawn:/var/lib/postgresql

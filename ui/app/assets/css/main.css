@@ -1,0 +1,57 @@
+@import url("https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap");
+@import "tailwindcss";
+
+@theme {
+    --font-display: "Chakra Petch", sans-serif;
+    --font-sans: "Manrope", system-ui, sans-serif;
+
+    --color-ink: #090a0f;
+    --color-surface: #0e1017;
+    --color-panel: #11131a;
+    --color-raised: #12141c;
+    --color-float: #161923;
+    --color-deep: #0c0d13;
+
+    --color-ember: #ff6a3d;
+    --color-ember-light: #ff8a5c;
+    --color-flare: #ff5a4d;
+    --color-hot: #ff2e63;
+    --color-glow: #5b6cff;
+
+    --color-rust-deep: #7a2e14;
+    --color-mw: #5fd3a2;
+    --color-mw-deep: #14473a;
+    --color-wardogs: #f2c14e;
+    --color-wardogs-deep: #6b4d12;
+
+    --color-discord: #5865f2;
+    --color-telegram: #229ed9;
+}
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        @apply bg-ink font-sans text-zinc-300 antialiased;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        html {
+            scroll-behavior: auto;
+        }
+    }
+}
+
+@utility bg-grid {
+    background-image:
+        linear-gradient(to right, rgb(255 255 255 / 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgb(255 255 255 / 0.03) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse at top, black, transparent 70%);
+}
+
+@utility bg-brand {
+    background-image: linear-gradient(to right, var(--color-ember), var(--color-hot));
+}
