@@ -6,94 +6,35 @@ useHead({
     ]
 })
 
-const games = [
-    {
-        id: 'rust',
-        name: 'Rust',
-        tag: 'Leveled by our team, skins and blueprints earned in raids',
-        count: 9,
-        from: 14,
-        tint: 'from-ember/30 via-rust-deep/20 to-transparent',
-        ring: 'hover:border-ember/60',
-        dot: 'bg-ember'
-    },
-    {
-        id: 'mw',
-        name: 'Call of Duty MW',
-        tag: 'Levels, camos and prestige unlocked by our squad',
-        count: 14,
-        from: 19,
-        tint: 'from-mw/25 via-mw-deep/20 to-transparent',
-        ring: 'hover:border-mw/60',
-        dot: 'bg-mw'
-    },
-    {
-        id: 'wardogs',
-        name: 'War Dogs',
-        tag: 'Ranked up together with gear and currency',
-        count: 6,
-        from: 9,
-        tint: 'from-wardogs/25 via-wardogs-deep/20 to-transparent',
-        ring: 'hover:border-wardogs/60',
-        dot: 'bg-wardogs'
-    },
-    {
-        id: 'fortnite',
-        name: 'Fortnite',
-        tag: 'High level accounts with skins, emotes and battle passes',
-        count: 8,
-        from: 12,
-        tint: 'from-violet-500/25 via-violet-900/20 to-transparent',
-        ring: 'hover:border-violet-500/60',
-        dot: 'bg-violet-500'
-    }
-]
+const apiBase = useRuntimeConfig().public.apiBase || ''
+const api = { baseURL: apiBase, default: () => [] }
 
-const otherGames = [
-    'Apex Legends',
-    'Valorant',
-    'Counter-Strike 2',
-    'GTA V Online',
-    'Warzone',
-    'Rainbow Six Siege',
-    'Minecraft',
-    'Roblox',
-    'League of Legends',
-    'Overwatch 2'
-]
-
-const { accounts } = useAccounts()
-
-const platforms = [
-    { name: 'Steam', icon: 'simple-icons:steam' },
-    { name: 'Activision', icon: 'simple-icons:activision' },
-    { name: 'Battle.net', icon: 'simple-icons:battledotnet' },
-    { name: 'Xbox', icon: 'simple-icons:xbox' },
-    { name: 'PlayStation', icon: 'simple-icons:playstation' },
-    { name: 'Epic Games', icon: 'simple-icons:epicgames' },
-    { name: 'EA', icon: 'simple-icons:ea' },
-    { name: 'Ubisoft', icon: 'simple-icons:ubisoft' },
-    { name: 'Riot Games', icon: 'simple-icons:riotgames' },
-    { name: 'GOG', icon: 'simple-icons:gogdotcom' },
-    { name: 'Nintendo', icon: 'simple-icons:nintendoswitch' },
-    { name: 'Rockstar', icon: 'simple-icons:rockstargames' }
-]
+const [
+    { data: games },
+    { data: otherGames },
+    { data: platforms },
+    { data: accounts },
+    { data: faqs }
+] = await Promise.all([
+    useFetch('/api/games', api),
+    useFetch('/api/other-games', api),
+    useFetch('/api/platforms', api),
+    useFetch('/api/accounts', api),
+    useFetch('/api/faqs', api)
+])
 
 const active = ref('all')
 
 const filtered = computed(() =>
-    active.value === 'all' ? accounts : accounts.filter((a) => a.game === active.value)
+    active.value === 'all' ? accounts.value : accounts.value.filter((a) => a.game === active.value)
 )
 
-const gameMeta = (id) => games.find((g) => g.id === id)
+const gameMeta = (slug) => games.value.find((g) => g.slug === slug)
 
-const tabs = [
+const tabs = computed(() => [
     { id: 'all', label: 'All games' },
-    { id: 'rust', label: 'Rust' },
-    { id: 'mw', label: 'Call of Duty MW' },
-    { id: 'wardogs', label: 'War Dogs' },
-    { id: 'fortnite', label: 'Fortnite' }
-]
+    ...games.value.map((g) => ({ id: g.slug, label: g.name }))
+])
 
 const stats = [
     { value: 'Team', label: 'Friends who play every day' },
@@ -123,37 +64,6 @@ const steps = [
     { title: 'Pay', body: 'Card, crypto or wallet. Simple checkout, no sign-up needed.' },
     { title: 'Get the original logins', body: 'You receive the account email, password and recovery details directly from us.' },
     { title: 'Change everything', body: 'Update email and credentials with the short guide we include. After that, only you can get in.' }
-]
-
-const faqs = [
-    {
-        q: 'Is this a marketplace with many sellers?',
-        a: 'No. respawn99 is a team of friends who play these games together. Every account here was leveled by us and we handle every order ourselves.'
-    },
-    {
-        q: 'Do you sell other games?',
-        a: 'Yes. Besides Rust, Call of Duty MW, War Dogs and Fortnite, we level accounts for Apex Legends, Valorant, CS2, GTA V and more. Message us with the game you want.'
-    },
-    {
-        q: 'How do I know the accounts were played legit?',
-        a: 'Each account has tracked playtime, level and progress. We share screenshots of play history and unlock stats before you buy.'
-    },
-    {
-        q: 'Do I really get full access?',
-        a: 'Yes. You get the original email, password and recovery details, plus a step-by-step guide to change them on each platform.'
-    },
-    {
-        q: 'How fast is delivery?',
-        a: 'Usually within minutes of payment. If we are offline, it is delivered as soon as we are back, never later than a few hours.'
-    },
-    {
-        q: 'What if something goes wrong after I buy?',
-        a: 'Message us. If the account has an issue that existed before the sale, we will fix it or replace it.'
-    },
-    {
-        q: 'What payments do you accept?',
-        a: 'Visa, Mastercard, Apple Pay, Google Pay, USDT, Bitcoin and Litecoin.'
-    }
 ]
 
 const openFaq = ref(0)
@@ -317,7 +227,7 @@ const openFaq = ref(0)
                 <button v-for="g in games" :key="g.id"
                     class="group relative overflow-hidden rounded-3xl border border-white/10 bg-surface p-7 text-left transition"
                     :class="g.ring"
-                    @click="active = g.id; $nextTick(() => document.getElementById('accounts')?.scrollIntoView({ behavior: 'smooth' }))">
+                    @click="active = g.slug; $nextTick(() => document.getElementById('accounts')?.scrollIntoView({ behavior: 'smooth' }))">
                     <div class="absolute inset-0 bg-gradient-to-br opacity-70 transition group-hover:opacity-100"
                         :class="g.tint" />
                     <div class="relative flex h-56 flex-col justify-between">
@@ -347,9 +257,9 @@ const openFaq = ref(0)
                 <p class="mt-2 text-zinc-400">Do not see your game? We level accounts for more titles. Message us and
                     we will tell you what we can deliver.</p>
                 <div class="mt-5 flex flex-wrap gap-2.5">
-                    <span v-for="o in otherGames" :key="o"
-                        class="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-zinc-300">{{ o
-                        }}</span>
+                    <span v-for="o in otherGames" :key="o.id"
+                        class="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-zinc-300">{{
+                        o.name }}</span>
                     <a href="#contact"
                         class="rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-black transition hover:bg-zinc-200">And
                         more</a>
@@ -542,10 +452,10 @@ const openFaq = ref(0)
                 before you buy</h2>
 
             <div class="mt-12 divide-y divide-white/10 rounded-3xl border border-white/10 bg-surface">
-                <div v-for="(f, i) in faqs" :key="f.q">
+                <div v-for="(f, i) in faqs" :key="f.id">
                     <button class="flex w-full items-center justify-between gap-6 px-6 py-5 text-left"
                         :aria-expanded="openFaq === i" @click="openFaq = openFaq === i ? null : i">
-                        <span class="font-semibold text-white">{{ f.q }}</span>
+                        <span class="font-semibold text-white">{{ f.question }}</span>
                         <Icon name="lucide:plus"
                             class="h-5 w-5 shrink-0 text-zinc-400 transition-transform duration-300"
                             :class="openFaq === i ? 'rotate-45' : ''" />
@@ -553,7 +463,7 @@ const openFaq = ref(0)
                     <div class="grid transition-all duration-300"
                         :class="openFaq === i ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'">
                         <div class="overflow-hidden">
-                            <p class="px-6 pb-6 leading-relaxed text-zinc-400">{{ f.a }}</p>
+                            <p class="px-6 pb-6 leading-relaxed text-zinc-400">{{ f.answer }}</p>
                         </div>
                     </div>
                 </div>
